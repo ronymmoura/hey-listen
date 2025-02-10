@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks:
+      - heylistennet
+    environment:
+      POSTGRES_DB: hey-listen
+      POSTGRES_USER: kamalion
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5433:5432"
+
+  migrate:
+    image: migrate/migrate
+    networks:
+      - heylistennet
+    volumes:
+      - ./internal/db/migrations:/app/internal/db/migrations
+    command: ["-path", "/app/internal/db/migrations", "-database",  "postgres://kamalion:pass@postgres:5432/hey-listen?sslmode=disable", "up"]
+    links: 
+      - postgres
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    networks:
+      - heylistennet
+    links:
+      - postgres
+      - migrate
+    command: ["/app/main"]
+
+  app-dev:
+    build:
+      dockerfile: Dockerfile-dev
+      context: ./
+    volumes:
+      - ./:/app
+    networks:
+      - heylistennet
+    links:
+      - postgres
+      - migrate
+    ports:
+      - 8081:8080
+
+volumes:
+  data:
+
+networks:
+  heylistennet:
+    driver: bridge

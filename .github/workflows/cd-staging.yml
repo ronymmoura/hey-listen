@@ -1,0 +1,90 @@
+name: cd-staging
+
+on:
+  push:
+    branches: 
+      - staging
+
+env:
+  ENV_VARS: |
+    ENVIRONMENT=production
+
+    DATABASE_HOST=postgres
+    DATABASE_NAME=hey-listen
+    DATABASE_USER=kamalion
+    DATABASE_PASSWORD=pass
+    DATABASE_PORT=5432
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          
+      - name: Go version
+        run: go version
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Build
+        run: |
+          CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -o ./out/main ./main.go
+
+      - name: Copy other files
+        run: |
+          cp Dockerfile-deploy ./out/Dockerfile
+          cp docker-compose.yml ./out/docker-compose.yml
+
+      - name: Write env
+        run: |
+          echo "${{ env.ENV_VARS }}" >> ./out/env
+          cat ./out/env
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: heylisten-staging
+          path: ./out
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: heylisten-staging
+          path: .
+
+      - name: Deploy
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.SERVER_SSH_KEY}}
+          ARGS: -rltgoDzvO --delete
+          SOURCE: "."
+          REMOTE_HOST: ${{secrets.REMOTE_HOST}}
+          REMOTE_USER: ${{secrets.REMOTE_USER}}
+          REMOTE_PORT: ${{secrets.REMOTE_PORT}}
+          TARGET: ${{secrets.REMOTE_TARGET}}
+
+      - name: Post Deploy
+        uses: appleboy/ssh-action@master
+        with:
+            host: ${{ secrets.REMOTE_HOST }}
+            username: ${{ secrets.REMOTE_USER }}
+            key: ${{ secrets.SERVER_SSH_KEY }}
+            port: ${{secrets.REMOTE_PORT}}
+            script: |
+              cd ${{secrets.REMOTE_TARGET}}
+              mv env .env
+              docker-compose up -d --build
