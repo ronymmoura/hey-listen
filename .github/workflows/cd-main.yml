@@ -41,8 +41,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
 
-      - name: Install dependencies
+      - name: Install Node dependencies
         uses: bahmutov/npm-install@v1
+        with:
+          working-directory: client
+
+      - name: Build client project
+        run: npm run build
         with:
           working-directory: client
 
