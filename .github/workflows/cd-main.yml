@@ -40,6 +40,7 @@ jobs:
 
       - name: Copy other files
         run: |
+          cp -r client/ ./out/client
           cp Dockerfile-deploy ./out/Dockerfile
           cp docker-compose.yml ./out/docker-compose.yml
 
@@ -87,4 +88,4 @@ jobs:
             script: |
               cd ${{secrets.REMOTE_TARGET}}
               mv env .env
-              docker-compose up -d --build
+              docker-compose up -d --build app
