@@ -1,9 +1,9 @@
-name: cd-staging
+name: cd-main
 
 on:
   push:
     branches: 
-      - staging
+      - main
 
 env:
   ENV_VARS: |
@@ -51,7 +51,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: heylisten-staging
+          name: heylisten-main
           path: ./out
 
   deploy:
@@ -63,7 +63,7 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: heylisten-staging
+          name: heylisten-main
           path: .
 
       - name: Deploy
