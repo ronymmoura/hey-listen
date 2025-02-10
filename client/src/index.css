@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-accent: rgb(149 140 255);
+  --color-secondary: #62CFFF;
+
+  
+}
+
+html,
+body,
+#root {
+  @apply h-full
+    bg-zinc-200
+    dark:bg-zinc-800;
+}
+
+input {
+  @apply border-b-2 outline-0 px-2 text-center;
+}
+
+.wrong {
+  @apply text-red-400;
+}
+
+.right {
+  @apply text-emerald-400;
+}
