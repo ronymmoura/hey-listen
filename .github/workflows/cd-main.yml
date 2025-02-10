@@ -47,9 +47,7 @@ jobs:
           working-directory: client
 
       - name: Build client project
-        run: npm run build
-        with:
-          working-directory: client
+        run: cd client && npm run build && cd ..
 
       - name: Copy other files
         run: |
