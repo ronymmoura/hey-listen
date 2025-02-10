@@ -51,7 +51,7 @@ jobs:
 
       - name: Copy other files
         run: |
-          mkdir ./out/client/dist/
+          mkdir -p ./out/client/dist/
           cp -r client/dist/ ./out/client/dist/
           cp Dockerfile-deploy ./out/Dockerfile
           cp docker-compose.yml ./out/docker-compose.yml
