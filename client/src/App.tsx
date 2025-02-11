@@ -1,11 +1,12 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import YouTube, { YouTubeProps } from "react-youtube";
+import { TiMediaFastForward, TiMediaRewind } from "react-icons/ti";
 import music from "./lyrics/1.json";
 import { cn } from "./lib/cn";
 
 function App() {
   const [currentTime, setCurrentTime] = useState(0);
-  const [matching, setMatching] = useState<{ [K: string]: { word: string; typedWord: string } }>();
+  const [matching, setMatching] = useState<{ [K: string]: { word: string; typedWord: string; seconds: number } }>();
 
   useLayoutEffect(() => {
     setTheme();
@@ -21,12 +22,20 @@ function App() {
   //   setTheme();
   // }
 
+  const currentTimeMark = Object.keys(music.lyrics)
+    .filter((x) => +x <= currentTime)
+    .reverse()[0];
+  // const currentLine = music.lyrics[currentTimeMark];
+
   const opts: YouTubeProps["opts"] = {
-    height: "390",
+    height: "360",
     width: "640",
     playerVars: {
       // https://developers.google.com/youtube/player_parameters
       autoplay: 0,
+      fs: 0,
+      controls: 0,
+      disablekb: 1,
     },
   };
 
@@ -56,6 +65,11 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const currentLineElement = document.getElementById(currentTimeMark);
+    currentLineElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+  }, [currentTimeMark]);
+
+  useEffect(() => {
     if (music) {
       const lines = Object.keys(music.lyrics);
 
@@ -74,12 +88,33 @@ function App() {
             [`${i}`]: {
               word,
               typedWord: "",
+              seconds: +lines[i],
             },
           }));
         }
       }
     }
   }, [music]);
+
+  async function togglePlay() {
+    const state = await ytRef.current.internalPlayer.getPlayerState();
+    if (state != 1) {
+      await ytRef.current.internalPlayer.playVideo();
+    } else {
+      await ytRef.current.internalPlayer.pauseVideo();
+    }
+  }
+
+  async function seek(val: number) {
+    await ytRef.current.internalPlayer.seekTo(currentTime + val);
+  }
+
+  // async function debug() {
+  //   const internalPlayer = ytRef.current.internalPlayer;
+  //   console.log({ internalPlayer });
+
+  //   await internalPlayer.seekTo(currentTime - 10);
+  // }
 
   function parseLine(idx: number, time: number, line: string): ReactNode {
     let space = false;
@@ -101,7 +136,10 @@ function App() {
             </span>
             <input
               id={`blank_${idx}`}
-              className={cn("transition-all", currentTime >= time ? "border-b-accent font-bold" : "text-white")}
+              className={cn(
+                "transition-all",
+                currentTime >= time ? "border-b-accent text-accent font-bold" : "text-white",
+              )}
               style={{
                 width: size + "px",
               }}
@@ -157,19 +195,32 @@ function App() {
   }
 
   return (
-    <div className="flex w-full flex-col items-center">
-      <YouTube
-        videoId="tIA_vrBDC1g"
-        opts={opts}
-        //onReady={onPlayerReady}
-        // onStateChange={handleStateChange}
-        // onPlay={handleOnPlay}
-        ref={ytRef}
-      />
-      {/* <div className="text-accent">{currentTime.toFixed(2)}</div> */}
-      <div className="mt-5 space-y-3 text-center text-3xl">
+    <div className="flex">
+      <div className="order-2 flex h-screen flex-col items-center p-5">
+        <YouTube videoId={music.id} opts={opts} ref={ytRef} />
+
+        {/* <div className="flex items-center space-x-3">
+          <div className="text-accent my-5 text-2xl">{currentTime.toFixed(2)}</div>
+          <button onClick={debug}>Debug</button>
+        </div> */}
+
+        <div className="flex space-x-3 p-3">
+          <button onClick={() => seek(-10)}>
+            <TiMediaRewind /> <span>10 seconds</span>
+          </button>
+          <button onClick={togglePlay}>Play/Pause</button>
+          <button onClick={() => seek(10)}>
+            <span>10 seconds</span>
+            <TiMediaFastForward />
+          </button>
+        </div>
+      </div>
+
+      <div className="no-scrollbar order-1 h-screen flex-1 space-y-3 overflow-y-auto p-5 text-center text-3xl">
         {Object.keys(music.lyrics).map((line, idx) => (
-          <div>{parseLine(idx, +line, music.lyrics[line])}</div>
+          <div key={idx} id={`${line}`}>
+            {parseLine(idx, +line, music.lyrics[line])}
+          </div>
         ))}
       </div>
     </div>
