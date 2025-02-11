@@ -195,8 +195,8 @@ function App() {
   }
 
   return (
-    <div className="flex">
-      <div className="order-2 flex h-screen flex-col items-center p-5">
+    <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col items-center p-5 lg:order-2 lg:h-screen">
         <YouTube videoId={music.id} opts={opts} ref={ytRef} />
 
         {/* <div className="flex items-center space-x-3">
@@ -216,7 +216,7 @@ function App() {
         </div>
       </div>
 
-      <div className="no-scrollbar order-1 h-screen flex-1 space-y-3 overflow-y-auto p-5 text-center text-3xl">
+      <div className="no-scrollbar h-screen space-y-3 overflow-y-auto p-5 text-center text-3xl lg:order-1 lg:flex-1">
         {Object.keys(music.lyrics).map((line, idx) => (
           <div key={idx} id={`${line}`}>
             {parseLine(idx, +line, music.lyrics[line])}
