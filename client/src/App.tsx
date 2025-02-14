@@ -5,6 +5,8 @@ import music from "./lyrics/1.json";
 import { cn } from "./lib/cn";
 
 function App() {
+  const ytRef = useRef<YouTube>(null);
+
   const [currentTime, setCurrentTime] = useState(0);
   const [matching, setMatching] = useState<{ [K: string]: { word: string; typedWord: string; seconds: number } }>();
 
@@ -46,8 +48,6 @@ function App() {
         (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches),
     );
   }
-
-  const ytRef = useRef<YouTube>(null);
 
   useEffect(() => {
     const int = setInterval(() => {
