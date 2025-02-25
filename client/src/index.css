@@ -13,8 +13,12 @@ html,
 body,
 #root {
   @apply h-full
-    bg-zinc-200
-    dark:bg-zinc-800;
+  transition-all
+  bg-white bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] 
+  text-zinc-800
+
+  dark:bg-neutral-950 dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] 
+  dark:text-white;
 }
 
 input {
