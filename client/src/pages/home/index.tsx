@@ -8,7 +8,7 @@ export function HomePage() {
   const ytRef = useRef<YouTube>(null);
 
   const [currentTime, setCurrentTime] = useState(0);
-  const [matching, setMatching] = useState<{ [K: string]: { word: string; typedWord: string; seconds: number } }>();
+  const [answers, setAnswers] = useState<{ [K: string]: { word: string; typedWord: string; seconds: number } }>();
 
   const currentTimeMark = Object.keys(music.lyrics)
     .filter((x) => +x <= currentTime)
@@ -16,8 +16,8 @@ export function HomePage() {
   // const currentLine = music.lyrics[currentTimeMark];
 
   const opts: YouTubeProps["opts"] = {
-    height: "360",
-    width: "640",
+    height: "0",
+    width: "0",
     playerVars: {
       // https://developers.google.com/youtube/player_parameters
       autoplay: 0,
@@ -45,6 +45,7 @@ export function HomePage() {
   useEffect(() => {
     const currentLineElement = document.getElementById(currentTimeMark);
     currentLineElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    currentLineElement.getElementsByTagName("input")[0]?.focus();
   }, [currentTimeMark]);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export function HomePage() {
           const values = line.substring(indexOfBlank + 2, indexOfEnding).split(":");
           const word = values[0];
 
-          setMatching((old) => ({
+          setAnswers((old) => ({
             ...old,
             [`${i}`]: {
               word,
@@ -87,6 +88,11 @@ export function HomePage() {
     await ytRef.current.internalPlayer.seekTo(currentTime + val);
   }
 
+  async function goto(time: number) {
+    await ytRef.current.internalPlayer.seekTo(time);
+    await ytRef.current.internalPlayer.playVideo();
+  }
+
   // async function debug() {
   //   const internalPlayer = ytRef.current.internalPlayer;
   //   console.log({ internalPlayer });
@@ -95,78 +101,54 @@ export function HomePage() {
   // }
 
   function parseLine(idx: number, time: number, line: string): ReactNode {
-    let space = false;
-
-    if (matching) {
+    if (answers) {
       const indexOfBlank = line.indexOf("{{");
 
-      space = line.indexOf("\n") > -1;
+      const hasSpaceAfter = line.indexOf("\n") > -1;
 
-      if (indexOfBlank > -1) {
-        const indexOfEnding = line.indexOf("}}");
-        const values = line.substring(indexOfBlank + 2, indexOfEnding).split(":");
-        const size = values[1];
+      if (indexOfBlank === -1) return <div className={hasSpaceAfter && "mb-5"}>{line}</div>;
 
-        return (
-          <>
-            <span className={cn("transition-all", currentTime >= time ? "text-accent font-bold" : "text-white")}>
-              {line.substring(0, indexOfBlank)}
-            </span>
-            <input
-              id={`blank_${idx}`}
-              className={cn(
-                "transition-all",
-                currentTime >= time ? "border-b-accent text-accent font-bold" : "text-white",
-              )}
-              style={{
-                width: size + "px",
-              }}
-              onChange={(e) => {
-                const oldMatching = matching;
-                oldMatching[idx].typedWord = e.target.value;
-                setMatching(oldMatching);
+      const indexOfEnding = line.indexOf("}}");
+      const values = line.substring(indexOfBlank + 2, indexOfEnding).split(":");
+      const size = values[1];
 
-                if (oldMatching[idx].typedWord.length >= oldMatching[idx].word.length) {
-                  if (oldMatching[idx].typedWord !== oldMatching[idx].word) {
-                    document.getElementById(`blank_${idx}`).classList.remove("right");
-                    document.getElementById(`blank_${idx}`).classList.add("wrong");
-                  } else {
-                    document.getElementById(`blank_${idx}`).classList.remove("wrong");
-                    document.getElementById(`blank_${idx}`).classList.add("right");
-                  }
+      return (
+        <div className={hasSpaceAfter && "mb-10"} onClick={() => goto(time)}>
+          <span>{line.substring(0, indexOfBlank)}</span>
+
+          <input
+            id={`blank_${idx}`}
+            className={
+              cn()
+              // "transition-all",
+              // currentTime >= time ? "border-b-accent text-accent font-bold" : "text-white",
+            }
+            style={{
+              width: size + "px",
+            }}
+            onChange={(e) => {
+              const oldanswers = answers;
+              oldanswers[idx].typedWord = e.target.value;
+              setAnswers(oldanswers);
+
+              if (oldanswers[idx].typedWord.length >= oldanswers[idx].word.length) {
+                if (oldanswers[idx].typedWord !== oldanswers[idx].word) {
+                  document.getElementById(`blank_${idx}`).classList.remove("right");
+                  document.getElementById(`blank_${idx}`).classList.add("wrong");
                 } else {
                   document.getElementById(`blank_${idx}`).classList.remove("wrong");
-                  document.getElementById(`blank_${idx}`).classList.remove("right");
+                  document.getElementById(`blank_${idx}`).classList.add("right");
                 }
-              }}
-            />
-            <span className={cn("transition-all", currentTime >= time ? "text-accent font-bold" : "text-white")}>
-              {line.substring(indexOfEnding + 2)}
-            </span>
+              } else {
+                document.getElementById(`blank_${idx}`).classList.remove("wrong");
+                document.getElementById(`blank_${idx}`).classList.remove("right");
+              }
+            }}
+          />
 
-            {space && (
-              <>
-                <br />
-                <br />
-                <br />
-              </>
-            )}
-          </>
-        );
-      } else {
-        return (
-          <div className={cn("transition-all", currentTime >= time ? "text-accent font-bold" : "text-white")}>
-            {line}
-            {space && (
-              <>
-                <br />
-                <br />
-                <br />
-              </>
-            )}
-          </div>
-        );
-      }
+          <span>{line.substring(indexOfEnding + 2)}</span>
+        </div>
+      );
     }
 
     return <></>;
@@ -194,10 +176,18 @@ export function HomePage() {
         </div>
       </div>
 
-      <div className="no-scrollbar h-screen space-y-3 overflow-y-auto p-5 text-center text-3xl lg:order-1 lg:flex-1">
-        {Object.keys(music.lyrics).map((line, idx) => (
-          <div key={idx} id={`${line}`}>
-            {parseLine(idx, +line, music.lyrics[line])}
+      <div className="no-scrollbar h-screen space-y-3 overflow-y-auto p-5 text-3xl lg:order-1 lg:flex-1">
+        {Object.keys(music.lyrics).map((time, idx) => (
+          <div
+            key={idx}
+            id={`${time}`}
+            className={cn(
+              "w-fit cursor-pointer p-1 transition-all hover:bg-zinc-800",
+              currentTime >= +time ? "text-accent font-bold" : "text-white",
+            )}
+            onClick={() => goto(+time)}
+          >
+            {parseLine(idx, +time, music.lyrics[time])}
           </div>
         ))}
       </div>

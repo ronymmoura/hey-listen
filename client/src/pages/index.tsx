@@ -6,15 +6,15 @@ export function RootLayout() {
     setTheme();
   }, []);
 
-  function handleToggleTheme() {
-    if (!("theme" in localStorage) || localStorage.theme === "dark") {
-      localStorage.theme = "light";
-    } else {
-      localStorage.theme = "dark";
-    }
+  // function handleToggleTheme() {
+  //   if (!("theme" in localStorage) || localStorage.theme === "dark") {
+  //     localStorage.theme = "light";
+  //   } else {
+  //     localStorage.theme = "dark";
+  //   }
 
-    setTheme();
-  }
+  //   setTheme();
+  // }
 
   function setTheme() {
     document.documentElement.classList.toggle(
