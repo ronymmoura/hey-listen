@@ -1,28 +1,18 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
   --color-accent: rgb(149 140 255);
-  --color-secondary: #62CFFF;
-
-  
+  --color-secondary: #62cfff;
 }
 
 html,
 body,
 #root {
-  @apply h-full
-  transition-all
-  bg-white bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] 
-  text-zinc-800
-
-  dark:bg-neutral-950 dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] 
-  dark:text-white;
+  @apply h-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] text-white transition-all;
 }
 
 input {
-  @apply border-b-2 outline-0 px-2 text-center;
+  @apply border-b-2 px-2 text-center outline-0;
 }
 
 .wrong {
@@ -34,7 +24,6 @@ input {
 }
 
 button {
-  @apply bg-accent flex h-fit items-center space-x-3 rounded-lg px-5 py-2 text-xl font-bold text-white;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -43,6 +32,6 @@ button {
 }
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
+  -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none;
 }
