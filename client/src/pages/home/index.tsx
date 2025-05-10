@@ -4,6 +4,7 @@ import api from "../../api";
 
 export function HomePage() {
   const [musics, setMusics] = useState<Music[]>([]);
+  const [picture] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -13,26 +14,25 @@ export function HomePage() {
   }, []);
 
   return (
-    <div className="flex w-screen justify-center py-5">
-      <div className="w-full max-w-xl gap-5 flex flex-col">
-        <div className="text-4xl font-semibold">
-          Musics
-        </div>
-
-        <div className="flex flex-col gap-y-5">
-          <a href="/studio" className="flex text-xl border bg-white/5 p-3 rounded-lg border-zinc-600 hover:bg-white/10 select-none cursor-pointer transition-all">New Music</a>
-
+    <div className="flex px-5 py-10">
+      <div className="flex w-full max-w-xl flex-col gap-5">
+        <div className="flex gap-y-5">
           {musics.map((music) => (
             <a
               href={`/music/${music.yt_id}`}
               key={music.id}
-              className="flex text-xl border bg-white/5 p-3 rounded-lg border-zinc-600 hover:bg-white/10 select-none cursor-pointer transition-all"
+              className="flex cursor-pointer flex-col items-center gap-y-5 rounded-lg bg-[#384364] p-3 text-xl transition-all select-none hover:bg-white/10"
             >
-              {music.title} - {music.artist}
+              <img src={picture} className="aspect-square w-[100px] rounded-lg bg-white" />
+
+              <div className="flex flex-col text-center">
+                <div className="font-lucky text-2xl">{music.title}</div>
+                <div>{music.artist}</div>
+              </div>
             </a>
           ))}
         </div>
       </div>
-    </div >
-  )
+    </div>
+  );
 }

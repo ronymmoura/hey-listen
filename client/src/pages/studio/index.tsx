@@ -26,8 +26,8 @@ export function StudioPage() {
       fs: 0,
       controls: 1,
       disablekb: 1,
-    }
-  }
+    },
+  };
 
   useEffect(() => {
     const int = setInterval(() => {
@@ -41,7 +41,7 @@ export function StudioPage() {
 
     return () => {
       clearInterval(int);
-    }
+    };
   }, []);
 
   async function togglePlay() {
@@ -73,13 +73,13 @@ export function StudioPage() {
     const ogLines = lyricsLines;
     ogLines[currentLine] = [currentTime.toFixed(2).padStart(9, "0"), ogLines[currentLine][1]];
     setLyricsLines(ogLines);
-    setCurrentLine(current => ++current);
+    setCurrentLine((current) => ++current);
   }
 
   async function handleSave() {
-    let lyricsMap: { [time: string]: string } = {};
+    const lyricsMap: { [time: string]: string } = {};
 
-    for (let line of lyricsLines) {
+    for (const line of lyricsLines) {
       lyricsMap[line[0]] = line[1];
     }
 
@@ -88,16 +88,19 @@ export function StudioPage() {
       artist,
       yt_id: musicID,
       lyrics: lyricsMap,
-    }
+    };
 
     await api.musics.create(req);
-
   }
 
   return (
     <div className="flex flex-row p-5">
       <div className="flex-1 text-xl">
-        {lyricsLines.map((line) => <div>{line[0]}: {line[1]}</div>)}
+        {lyricsLines.map((line) => (
+          <div>
+            {line[0]}: {line[1]}
+          </div>
+        ))}
       </div>
 
       <div className="flex-1">
@@ -146,6 +149,5 @@ export function StudioPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

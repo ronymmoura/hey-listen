@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import '@fontsource/luckiest-guy';
 
 @theme {
   --color-accent: rgb(149 140 255);
@@ -8,7 +9,12 @@
 html,
 body,
 #root {
-  @apply h-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] text-white transition-all;
+  @apply h-full max-w-screen bg-[#19233B];
+}
+
+.font-lucky {
+  font-family: 'Luckiest Guy', system-ui;
+  letter-spacing: 1px;
 }
 
 input {

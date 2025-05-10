@@ -14,7 +14,7 @@ func createRandomMusic(t *testing.T) *models.Music {
 		Title:  "Test Title",
 		Artist: "Test Artist",
 		YtID:   strconv.Itoa(rand.Intn(9999 - 1000 + 1)),
-		Lyrics: "Test Lyrics",
+		Lyrics: map[string]string{"0": "Test Lyrics"},
 	}
 
 	music, err := NewMusicRepository(testDB).Insert(args)

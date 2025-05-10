@@ -19,9 +19,11 @@ export function MusicPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [answers, setAnswers] = useState<{ [K: string]: { word: string; typedWord: string; seconds: number } }>();
 
-  const currentTimeMark = music && Object.keys(music.lyrics)
-    .filter((x) => +x <= currentTime)
-    .reverse()[0];
+  const currentTimeMark =
+    music &&
+    Object.keys(music.lyrics)
+      .filter((x) => +x <= currentTime)
+      .reverse()[0];
   // const currentLine = music.lyrics[currentTimeMark];
 
   const opts: YouTubeProps["opts"] = {
@@ -62,7 +64,9 @@ export function MusicPage() {
     if (music) {
       (async () => {
         const accessKey = "n940eVW90DffI_0F68jJXLupWryAKbUwHhAoIWfMhpU";
-        const pictureRes = await fetch(`https://api.unsplash.com/photos/random?client_id=${accessKey}&topics=music&query=${music.artist}`)
+        const pictureRes = await fetch(
+          `https://api.unsplash.com/photos/random?client_id=${accessKey}&topics=music&query=${music.artist}`,
+        );
         const pic = await pictureRes.json();
         setPicture(pic.urls.thumb);
       })();
@@ -186,16 +190,15 @@ export function MusicPage() {
   }
 
   if (!music) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
     <div className="flex flex-col lg:flex-row">
-      <div className="flex flex-col items-center p-5 lg:order-2 mt-20 bg-white/5 w-[450px] gap-y-10">
-        <img src={picture} className="aspect-square bg-white rounded-2xl w-[200px]" />
+      <div className="mt-20 flex w-[450px] flex-col items-center gap-y-10 bg-white/5 p-5 lg:order-2">
+        <img src={picture} className="aspect-square w-[200px] rounded-2xl bg-white" />
 
-
-        <div className="text-center gap-y-3 flex flex-col">
+        <div className="flex flex-col gap-y-3 text-center">
           <div className="text-4xl font-semibold">{music.title}</div>
           <div>{music.artist}</div>
         </div>
@@ -209,9 +212,12 @@ export function MusicPage() {
 
         <div className="flex space-x-3">
           <button onClick={() => seek(-10)} className="">
-            <TiMediaRewind className="text-2xl hover:text-zinc-400 cursor-pointer transition-all" />
+            <TiMediaRewind className="cursor-pointer text-2xl transition-all hover:text-zinc-400" />
           </button>
-          <button onClick={togglePlay} className="text-3xl bg-white text-zinc-700 p-2 rounded-full hover:bg-zinc-300 transition-all cursor-pointer">
+          <button
+            onClick={togglePlay}
+            className="cursor-pointer rounded-full bg-white p-2 text-3xl text-zinc-700 transition-all hover:bg-zinc-300"
+          >
             {isPlaying ? <TiMediaPause /> : <TiMediaPlay />}
           </button>
           <button onClick={() => seek(10)} className="">
@@ -220,7 +226,7 @@ export function MusicPage() {
         </div>
       </div>
 
-      <div className="no-scrollbar h-screen space-y-3 overflow-y-auto p-10 text-3xl lg:order-1 lg:flex-1 pt-24">
+      <div className="no-scrollbar h-screen space-y-3 overflow-y-auto p-10 pt-24 text-3xl lg:order-1 lg:flex-1">
         {Object.keys(music.lyrics).map((time, idx) => (
           <div
             key={idx}
