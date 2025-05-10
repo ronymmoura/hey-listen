@@ -12,13 +12,13 @@ export function RootLayout() {
           <div className="text-4xl">Hey, listen!</div>
         </div>
 
-        <div className="flex rounded-lg bg-[#384364] px-2 py-1 pr-[200px]">
-          <div className="flex items-end gap-x-2">
+        <div className="flex rounded-lg bg-[#384364] px-2 py-1 mr-4 mt-10 pr-[200px] relative">
+          <div className="flex items-baseline gap-x-2">
             <TiStarFullOutline className="text-5xl text-amber-400" />
-            <div className="font-lucky text-4xl text-amber-400">500</div>
+            <div className="font-lucky text-4xl  text-amber-400">500</div>
           </div>
 
-          <div className="absolute top-[15px] right-[50px] flex justify-center">
+          <div className="absolute -top-[45px] right-[50px] flex justify-center">
             <img
               src="https://gravatar.com/userimage/91635443/ca6a48e3bdb7aa0be63b1156001bf5d8.jpeg?size=128"
               alt="Rony"
