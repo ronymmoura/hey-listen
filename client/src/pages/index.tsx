@@ -1,7 +1,9 @@
-import { Outlet } from "react-router";
+import { Link, Outlet } from "react-router";
 import { PiUserSoundFill } from "react-icons/pi";
-import { TiStarFullOutline } from "react-icons/ti";
+import { TiStarFullOutline, TiVideoOutline } from "react-icons/ti";
 import { HiBookmark } from "react-icons/hi2";
+import { TbHomeFilled } from "react-icons/tb";
+import { FaHistory } from "react-icons/fa";
 
 export function RootLayout() {
   return (
@@ -12,13 +14,13 @@ export function RootLayout() {
           <div className="text-4xl">Hey, listen!</div>
         </div>
 
-        <div className="flex rounded-lg bg-[#384364] px-2 py-1 mr-4 mt-10 pr-[200px] relative">
-          <div className="flex items-baseline gap-x-2">
-            <TiStarFullOutline className="text-5xl text-amber-400" />
-            <div className="font-lucky text-4xl  text-amber-400">500</div>
+        <div className="relative mt-10 mr-4 flex rounded-lg bg-[#384364] px-4 py-2 pr-[200px]">
+          <div className="flex items-end gap-x-2">
+            <TiStarFullOutline className="text-4xl text-amber-400" />
+            <div className="font-lucky text-3xl text-amber-400">500</div>
           </div>
 
-          <div className="absolute -top-[45px] right-[50px] flex justify-center">
+          <div className="absolute -top-[45px] right-[30px] flex justify-center">
             <img
               src="https://gravatar.com/userimage/91635443/ca6a48e3bdb7aa0be63b1156001bf5d8.jpeg?size=128"
               alt="Rony"
@@ -37,18 +39,22 @@ export function RootLayout() {
         </div>
       </div>
 
-      <div className="flex max-h-screen">
-        <nav className="flex h-auto w-[350px] flex-col gap-y-3 pt-10">
-          <a href="/" className="rounded-lg border border-zinc-600 bg-white/5 p-4 transition-all hover:bg-white/10">
+      <div className="flex">
+        <nav className="flex w-[350px] flex-col justify-center gap-y-5 pt-10">
+          <Link to="/" className="font-lucky flex items-center gap-x-3 text-3xl">
+            <TbHomeFilled />
             Home
-          </a>
+          </Link>
 
-          <a
-            href="/studio"
-            className="rounded-lg border border-zinc-600 bg-white/5 p-4 transition-all hover:bg-white/10"
-          >
+          <Link to="/" className="font-lucky flex items-center gap-x-3 text-3xl">
+            <FaHistory />
+            History
+          </Link>
+
+          <Link to="/studio" className="font-lucky flex items-center gap-x-3 text-3xl">
+            <TiVideoOutline />
             Studio
-          </a>
+          </Link>
         </nav>
 
         <div className="flex-1">
