@@ -13,7 +13,6 @@ export function StudioPage() {
   const [artist, setArtist] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [lyricsLines, setLyricsLines] = useState<[string, string][]>([]);
-  const [lyricsJson, setLyricsJson] = useState("");
 
   const [currentLine, setCurrentLine] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -55,11 +54,6 @@ export function StudioPage() {
 
   async function seek(val: number) {
     await ytRef.current.internalPlayer.seekTo(currentTime + val);
-  }
-
-  async function goto(time: number) {
-    await ytRef.current.internalPlayer.seekTo(time);
-    await ytRef.current.internalPlayer.playVideo();
   }
 
   function handleLoadMusic() {
