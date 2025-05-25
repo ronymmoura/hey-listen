@@ -1,92 +1,48 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
-import YouTube, { YouTubeProps } from "react-youtube";
-import { TiMediaFastForward, TiMediaPause, TiMediaPlay, TiMediaRewind } from "react-icons/ti";
-// import music from "../../lyrics/1.json";
+import { ReactNode, useEffect } from "react";
 import { cn } from "../../lib/cn";
-import { Music } from "../../models";
 import api from "../../api";
 import { useParams } from "react-router";
+import { useGameStore } from "../../stores";
+import { Player } from "./player";
 
 export function MusicPage() {
   const params = useParams();
-
-  const ytRef = useRef<YouTube>(null);
-
-  const [music, setMusic] = useState<Music | undefined>();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [picture, setPicture] = useState("");
-
-  const [currentTime, setCurrentTime] = useState(0);
-  const [answers, setAnswers] = useState<{ [K: string]: { word: string; typedWord: string; seconds: number } }>();
-
-  const currentTimeMark =
-    music &&
-    Object.keys(music.lyrics)
-      .filter((x) => +x <= currentTime)
-      .reverse()[0];
-  // const currentLine = music.lyrics[currentTimeMark];
-
-  const opts: YouTubeProps["opts"] = {
-    height: "0",
-    width: "0",
-    playerVars: {
-      // https://developers.google.com/youtube/player_parameters
-      autoplay: 0,
-      fs: 0,
-      controls: 1,
-      disablekb: 1,
-    },
-  };
+  const gameStore = useGameStore();
 
   useEffect(() => {
     (async () => {
       const music = await api.musics.get(params.yt_id);
-      setMusic(music);
+      gameStore.setMusic(music);
     })();
   }, []);
 
-  useEffect(() => {
-    const int = setInterval(() => {
-      (async () => {
-        if (ytRef.current && ytRef.current.internalPlayer.getCurrentTime) {
-          const time = await ytRef.current.internalPlayer.getCurrentTime();
-          setCurrentTime(time);
-        }
-      })();
-    }, 250);
-
-    return () => {
-      clearInterval(int);
-    };
-  }, []);
+  // useEffect(() => {
+  //   if (gameStore.music) {
+  //     (async () => {
+  //       const accessKey = "n940eVW90DffI_0F68jJXLupWryAKbUwHhAoIWfMhpU";
+  //       const pictureRes = await fetch(
+  //         `https://api.unsplash.com/photos/random?client_id=${accessKey}&topics=music&query=${gameStore.music.artist}`,
+  //       );
+  //       //const pic = await pictureRes.json();
+  //       //setPicture(pic.urls.thumb);
+  //     })();
+  //   }
+  // }, [gameStore.music]);
 
   useEffect(() => {
-    if (music) {
-      (async () => {
-        const accessKey = "n940eVW90DffI_0F68jJXLupWryAKbUwHhAoIWfMhpU";
-        const pictureRes = await fetch(
-          `https://api.unsplash.com/photos/random?client_id=${accessKey}&topics=music&query=${music.artist}`,
-        );
-        const pic = await pictureRes.json();
-        setPicture(pic.urls.thumb);
-      })();
-    }
-  }, [music]);
-
-  useEffect(() => {
-    if (music) {
-      const currentLineElement = document.getElementById(currentTimeMark);
+    const currentLineElement = document.getElementById(gameStore.currentTimeMark);
+    if (currentLineElement) {
       currentLineElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
       currentLineElement.getElementsByTagName("input")[0]?.focus();
     }
-  }, [currentTimeMark]);
+  }, [gameStore.currentTimeMark]);
 
   useEffect(() => {
-    if (music) {
-      const lines = Object.keys(music.lyrics);
+    if (gameStore.music) {
+      const lines = Object.keys(gameStore.music.lyrics);
 
       for (let i = 0; i < lines.length; i++) {
-        const line = music.lyrics[lines[i]];
+        const line = gameStore.music.lyrics[lines[i]];
 
         const indexOfBlank = line.indexOf("{{");
 
@@ -94,39 +50,17 @@ export function MusicPage() {
           const indexOfEnding = line.indexOf("}}");
           const values = line.substring(indexOfBlank + 2, indexOfEnding).split(":");
           const word = values[0];
-
-          setAnswers((old) => ({
-            ...old,
+          gameStore.updateAnswers({
             [`${i}`]: {
               word,
               typedWord: "",
               seconds: +lines[i],
             },
-          }));
+          });
         }
       }
     }
-  }, [music]);
-
-  async function togglePlay() {
-    const state = await ytRef.current.internalPlayer.getPlayerState();
-    if (state != 1) {
-      await ytRef.current.internalPlayer.playVideo();
-      setIsPlaying(true);
-    } else {
-      await ytRef.current.internalPlayer.pauseVideo();
-      setIsPlaying(false);
-    }
-  }
-
-  async function seek(val: number) {
-    await ytRef.current.internalPlayer.seekTo(currentTime + val);
-  }
-
-  async function goto(time: number) {
-    await ytRef.current.internalPlayer.seekTo(time);
-    await ytRef.current.internalPlayer.playVideo();
-  }
+  }, [gameStore.music]);
 
   // async function debug() {
   //   const internalPlayer = ytRef.current.internalPlayer;
@@ -135,8 +69,12 @@ export function MusicPage() {
   //   await internalPlayer.seekTo(currentTime - 10);
   // }
 
+  async function goto(time: number) {
+    gameStore.setCurrentTime(time);
+  }
+
   function parseLine(idx: number, time: number, line: string): ReactNode {
-    if (answers) {
+    if (gameStore.answers) {
       const indexOfBlank = line.indexOf("{{");
 
       const hasSpaceAfter = line.indexOf("\n") > -1;
@@ -162,9 +100,9 @@ export function MusicPage() {
               width: size + "px",
             }}
             onChange={(e) => {
-              const oldanswers = answers;
+              const oldanswers = gameStore.answers;
               oldanswers[idx].typedWord = e.target.value;
-              setAnswers(oldanswers);
+              gameStore.setAnswers(oldanswers);
 
               if (oldanswers[idx].typedWord.length >= oldanswers[idx].word.length) {
                 if (oldanswers[idx].typedWord !== oldanswers[idx].word) {
@@ -189,55 +127,26 @@ export function MusicPage() {
     return <></>;
   }
 
-  if (!music) {
+  if (!gameStore.music) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="flex flex-col lg:flex-row">
-      <div className="mt-20 flex w-[450px] flex-col items-center gap-y-10 bg-white/5 p-5 lg:order-2">
-        <img src={picture} className="aspect-square w-[200px] rounded-2xl bg-white" />
+      <Player />
 
-        <div className="flex flex-col gap-y-3 text-center">
-          <div className="text-4xl font-semibold">{music.title}</div>
-          <div>{music.artist}</div>
-        </div>
-
-        <YouTube videoId={music.yt_id} opts={opts} ref={ytRef} />
-
-        {/* <div className="flex items-center space-x-3">
-          <div className="text-accent my-5 text-2xl">{currentTime.toFixed(2)}</div>
-          <button onClick={debug}>Debug</button>
-        </div> */}
-
-        <div className="flex space-x-3">
-          <button onClick={() => seek(-10)} className="">
-            <TiMediaRewind className="cursor-pointer text-2xl transition-all hover:text-zinc-400" />
-          </button>
-          <button
-            onClick={togglePlay}
-            className="cursor-pointer rounded-full bg-white p-2 text-3xl text-zinc-700 transition-all hover:bg-zinc-300"
-          >
-            {isPlaying ? <TiMediaPause /> : <TiMediaPlay />}
-          </button>
-          <button onClick={() => seek(10)} className="">
-            <TiMediaFastForward className="text-2xl" />
-          </button>
-        </div>
-      </div>
-
-      <div className="no-scrollbar h-screen space-y-3 overflow-y-auto p-10 pt-24 text-3xl lg:order-1 lg:flex-1">
-        {Object.keys(music.lyrics).map((time, idx) => (
+      <div className="no-scrollbar h-[83svh] flex-1 space-y-3 overflow-y-auto p-10 text-3xl lg:order-1">
+        {Object.keys(gameStore.music.lyrics).map((time, idx) => (
           <div
             key={idx}
             id={`${time}`}
             className={cn(
               "w-fit cursor-pointer p-1 transition-all hover:bg-zinc-800",
-              currentTime >= +time ? "text-accent font-bold" : "text-white",
+              gameStore.currentTime >= +time ? "text-accent font-bold" : "text-white",
             )}
             onClick={() => goto(+time)}
           >
-            {parseLine(idx, +time, music.lyrics[time])}
+            {parseLine(idx, +time, gameStore.music.lyrics[time])}
           </div>
         ))}
       </div>
